@@ -44,7 +44,7 @@ class LinkedQueue:
         if self.isEmpty():
             self._tail = None
         return element
-  
+
 
 class Tree:
     class Position:
@@ -119,6 +119,33 @@ class Tree:
                 yield position
                 for child in self.children(position):
                     Queue.enqueue(child)
+
+    def preOrderIndentation(self, p, d ):
+        print(2*d*" ", p.element())
+        for child in self.children(p):
+            self.preOrderIndentation(child, d+1)
+
+    def preOrderLabel(self, p, d, path):
+        label = '.'.join(str(j+1) for j in path)
+        print(2*d*' ',label, p.element())
+        path.append(0)
+        for child in self.children(p):
+            self.preOrderLabel(child,d+1, path)
+            path[-1] += 1
+        path.pop()
+
+    def preOrderParenthesis(self,p):
+        print(p.element(), end='')
+        if not self.isLeaf(p):
+            firstTime = True
+            for child in self.children(p):
+                symbol = '(' if firstTime else ','
+                print(symbol, end='')
+                firstTime = False
+                self.preOrderParenthesis(child)
+            print(')', end='')
+
+    
     
 
 class BinaryTree(Tree):
@@ -314,17 +341,16 @@ class LinkedBinaryTree(BinaryTree):
         return self._height2(p)
 
 
-
 T = LinkedBinaryTree()
 print("Size of tree is ", len(T))
 print("Tree is empty ??", T.isEmpty())
-root = T.addRoot(100)
-left = T.addLeft(root, 200)
-leftLeft = T.addLeft(left, 400)
-leftRight = T.addRight(left, 500)
-right = T.addRight(root, 300)
-rightLeft = T.addLeft(right, 600)
-rightRight = T.addRight(right, 700)
+root = T.addRoot('Root')
+left = T.addLeft(root, 'Left')
+leftLeft = T.addLeft(left, 'Left Left')
+leftRight = T.addRight(left, 'Left Right')
+right = T.addRight(root, 'Right')
+rightLeft = T.addLeft(right, 'Right Left')
+rightRight = T.addRight(right, 'Right Right')
 print("Size of tree is ", len(T))
 print("Tree is empty ??", T.isEmpty())
 
@@ -336,13 +362,53 @@ postOrderElements = [position.element() for position in T.postOrderTraversal()]
 print("postOrderElements", postOrderElements)
 depthFirstElements = [position.element() for position in T.depthFirstTraversal()]
 print("depthFirstElements", depthFirstElements)
+
+print('\nIndented Chapter Representation\n')
+T.preOrderIndentation(T.root(),0)
+
+print('\nParenthesis Chapter Representation\n')
+T.preOrderParenthesis(T.root())
+
+print('\nLabeled Chapter Representation\n')
+T.preOrderLabel(T.root(),0,[])
+
+
+class EulerTour:
+
+    def __init__(self,tree):
+        self._tree = tree
+
+    def execute(self):
+        print("I am from tree",self._tree.root().element())
+        if len(self._tree) > 0:
+            return self._tour(self._tree.root(),0,[])
+
     
+    def _preVisitHook(self, position, depth, path):
+        pass
+
+    def _postVisitHook(self, position, depth, path, result):
+        pass
+
+    def _tour(self, position,depth, path):
+        self._preVisitHook(position, depth, path)
+        results = []
+        path.append(0)
+        for child in self._tree.children(position):
+            results.append(self._tour(child,depth+1, path))
+            path[-1] += 1
+        path.pop()
+        answer = self._postVisitHook(position, depth, path, results)
+        return answer
+
     
+class PrintPreVisitIndentedTour(EulerTour):
+    def _preVisitHook(self,position, depth, path):
+        print(2 * depth * ' ', position.element())
 
 
         
-
-    
-    
-
-              
+print('\n\n Euler Tour')
+printIndentedTour = PrintPreVisitIndentedTour(T)
+printIndentedTour.execute()
+               
